@@ -1,2 +1,0 @@
-# Quarto
-Quarto
