@@ -1,0 +1,6 @@
+"0","library(readxl)"
+"0",""
+"0","SalesS <- read_xlsx(""Adventure.xlsx"",sheet = ""Sales SalesOrderDetail"")"
+"0","SalesH <- read_xlsx(""Adventure.xlsx"",sheet = ""Sales SalesOrderHeader"")"
+"0","Territory <- read_xlsx(""Adventure.xlsx"",sheet = ""Sales SalesTerritory"")"
+"0","Prods <- read_xlsx(""Adventure.xlsx"",sheet = ""Production.Product"")"

@@ -1,0 +1,38 @@
+---
+title: "Adventure Works"
+format:
+  revealjs: 
+    theme: default
+---
+
+## Explanatory Data analysis
+
+```{r}
+library(readxl)
+
+SalesS <- read_xlsx("Adventure.xlsx",sheet = "Sales SalesOrderDetail")
+SalesH <- read_xlsx("Adventure.xlsx",sheet = "Sales SalesOrderHeader")
+Territory <- read_xlsx("Adventure.xlsx",sheet = "Sales SalesTerritory")
+Prods <- read_xlsx("Adventure.xlsx",sheet = "Production.Product")
+```
+
+```{r}
+library(gt)
+library(tidyverse)
+library(skimr)
+#names(Prods)
+
+Prod_select <- Prods |>
+  select(ProductID,Name,Color,Style,ListPrice)
+
+Prod_select |> 
+  filter(ListPrice > 0) |> 
+  slice_max(order_by = ListPrice,n = 10) |>
+  gt()
+
+```
+
+::: aside
+
+Some additional commentary of more peripheral interest.
+:::

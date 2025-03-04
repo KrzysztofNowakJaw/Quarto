@@ -1,0 +1,112 @@
+#https://book.rwithoutstatistics.com/tables-chapter
+# Libraries ---------------------------------------------------------------
+
+library(tidyverse)
+library(plotly)
+library(readxl)
+library(xts)
+library(gghighlight)
+library(MetBrewer)
+library(patchwork)
+library(gt)
+
+
+# Fix charts style --------------------------------------------------------
+
+theme_set(theme_light())
+
+
+# Fix files location ------------------------------------------------------
+
+path <- "/Users/krzysztofnowak/Desktop/R notes/RWithouTStatistics"
+setwd(path)
+
+
+# Resources ---------------------------------------------------------------
+
+
+SalesS <- read_xlsx("Adventure.xlsx",sheet = "Sales SalesOrderDetail")
+SalesH <- read_xlsx("Adventure.xlsx",sheet = "Sales SalesOrderHeader")
+Territory <- read_xlsx("Adventure.xlsx",sheet = "Sales SalesTerritory")
+Prods <- read_xlsx("Adventure.xlsx",sheet = "Production.Product")
+
+
+# Build new table ---------------------------------------------------------
+
+MyTheme <- 
+  theme(
+    title = element_text(colour = "gray40"),
+    axis.text = element_text(colour = "gray40"),
+    panel.grid.minor = element_line(colour = "white"),
+    panel.grid.major = element_line(colour = "white"),
+    panel.border = element_blank(),
+    legend.box.spacing = unit(0.2, 'cm'),
+    plot.caption = element_text(hjust = 0,size = 7),
+    panel.background = element_blank(),
+  )
+
+df <- SalesH %>% 
+  left_join(select(Territory,TerritoryID,Name,Group),by = "TerritoryID") # join with territory table
+
+df$OrderDate <- as.Date(df$OrderDate) # Turn Order date to date type
+
+
+YearlyOrders <- df |>
+  group_by(Group,Year = year(OrderDate)) |>
+  summarise(Orders = n(),.groups = "drop")
+
+#Yearly number of orders
+p1 <- ggplot(data = YearlyOrders,
+       mapping = aes(x = Year, y = Orders, fill = Group)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(x = Year, y = Orders, label = Orders), position = position_dodge(width = 0.9), vjust = -0.5,color = "#626d77",size = 2.7) +
+  scale_fill_brewer(direction = 1, palette = 1) +
+  scale_y_continuous(breaks = scales::breaks_extended(n = 11)) +
+  labs(title = "Number of Orders", 
+       subtitle = "Split by Region and Year",caption = "Source:Adventure Works database") +
+  xlab(label = "") +
+  guides(fill = guide_legend(title = "Region")) +
+  theme(legend.position = "top",
+        plot.title.position  = "plot") +
+  MyTheme
+
+p1
+
+ggplot(data = YearlyOrders,
+       mapping = aes(x = Year, y = Orders, fill = Group)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(x = Year, y = Orders, label = Orders), position = position_dodge(width = 0.9), vjust = -0.5,color = "#626d77",size = 2.7) +
+  scale_fill_brewer(direction = 1, palette = 1) +
+  labs(title = "Number of Orders", 
+       subtitle = "Split by Region and Year",caption = "Source:Adventure Works database") +
+  xlab(label = "") +
+  guides(fill = guide_legend(title = "Region")) +
+  theme(legend.position = "top",
+        plot.title.position  = "plot") +
+  MyTheme
+
+
+
+DailySales <- df |>
+  mutate(Month = floor_date(OrderDate,unit = "month")) |>
+  summarise(Orders = n(),.by = c("Month","Group"))
+
+DailySales |>
+  ggplot(aes(x = Month,y = Orders,color = Group)) +
+  geom_line() +
+  scale_color_brewer(direction = 1, palette = 3) +
+  scale_x_date(date_breaks = "6 month",date_labels = "%Y\n%b") +
+  labs(title = "Number of Orders", 
+       subtitle = "Monthly values",caption = "Source:Adventure Works database") +
+  xlab(label = "") +
+  guides(fill = guide_legend(title = "Region")) +
+  theme(legend.position = "top",
+        plot.title.position  = "plot") +
+  MyTheme
+
+
+
+
+
+
+
